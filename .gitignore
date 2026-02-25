@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Database
+backend/dev.db
+backend/dev.db-journal
+backend/dev.db-shm
+backend/dev.db-wal
+
+# Environment
+.env
+*/.env
+
+# Logs
+*.log
+backend/error.log
+backend/server.log
+backend/output.txt
+
+# Debug/test files
+backend/reproduce_*.js
+backend/test_*.js
+
+# Build output
+dist/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
