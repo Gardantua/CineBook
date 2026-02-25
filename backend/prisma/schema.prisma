@@ -1,0 +1,121 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  avatar    String?
+  bio       String?
+  resetToken String?
+  resetTokenExpiry DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lists     List[]
+  reviews   Review[]
+  activities Activity[]
+  
+  followers Follow[] @relation("following")
+  following Follow[] @relation("follower")
+  
+  activityLikes    ActivityLike[]
+  activityComments ActivityComment[]
+}
+
+model Follow {
+  followerId Int
+  followingId Int
+  createdAt  DateTime @default(now())
+
+  follower   User @relation("follower", fields: [followerId], references: [id])
+  following  User @relation("following", fields: [followingId], references: [id])
+
+  @@id([followerId, followingId])
+}
+
+model List {
+  id        Int      @id @default(autoincrement())
+  name      String
+  type      String   // WATCHED, WATCHLIST, READ, READLIST, CUSTOM
+  userId    Int
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  items     ListItem[]
+}
+
+model ListItem {
+  id        Int      @id @default(autoincrement())
+  listId    Int
+  mediaId   String   // TMDb ID or Google Books ID
+  mediaType String   // MOVIE or BOOK
+  title     String?  // Cache title for display
+  posterPath String? // Cache poster for display
+  addedAt   DateTime @default(now())
+
+  list      List     @relation(fields: [listId], references: [id])
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  mediaId   String
+  mediaType String   // MOVIE or BOOK
+  rating    Int?     // 1-10
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Activity {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  type      String   // REVIEW, RATING, ADD_TO_LIST
+  mediaId   String
+  mediaType String
+  mediaTitle String?
+  mediaPoster String?
+  rating    Int?     // If type is RATING
+  comment   String?  // If type is REVIEW (excerpt)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  likes     ActivityLike[]
+  comments  ActivityComment[]
+}
+
+model ActivityLike {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  activityId Int
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  activity  Activity @relation(fields: [activityId], references: [id])
+
+  @@unique([userId, activityId])
+}
+
+model ActivityComment {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  activityId Int
+  content   String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  activity  Activity @relation(fields: [activityId], references: [id])
+}
