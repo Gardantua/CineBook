@@ -1,3 +1,4 @@
+const { readJwtSecret } = require('../config/auth');
 const jwt = require('jsonwebtoken');
 
 module.exports = (req, res, next) => {
@@ -8,7 +9,7 @@ module.exports = (req, res, next) => {
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret_key_change_this');
+        const decoded = jwt.verify(token, readJwtSecret());
         req.user = decoded;
         next();
     } catch (error) {

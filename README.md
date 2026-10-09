@@ -1,203 +1,57 @@
-# CineBook 🎬📚
+# CineBook
 
-**Web Tabanlı Sosyal Kütüphane Platformu**
+Film ve kitapları aynı yerde takip etmek için geliştirdiğim web uygulaması. Kullanıcılar kendi listelerini oluşturabiliyor, içerikleri puanlayıp yorumlayabiliyor ve birbirlerinin aktivitelerini takip edebiliyor. Kocaeli Üniversitesi Yazılım Laboratuvarı dersi kapsamında çalıştım.
 
-Kocaeli Üniversitesi Bilgisayar Mühendisliği — Yazılım Laboratuvarı I, Proje II
+Bu projede kullanıcı, içerik, liste, yorum ve takip ilişkilerini bir veritabanında modellemeye; backend ile React arayüzünü bir araya getirmeye odaklandım.
 
----
+## Neler var?
 
-## Proje Hakkında
+- Kayıt, giriş, profil düzenleme ve e-posta ile şifre sıfırlama.
+- TMDb üzerinden film, Google Books üzerinden kitap arama.
+- İzlediklerim, izleyeceklerim, okuduklarım ve okuyacaklarım listeleri; özel koleksiyonlar.
+- Puanlama, yorumlar, kullanıcı takibi ve sosyal aktivite akışı.
 
-CineBook, kullanıcıların kişisel film ve kitap kütüphanelerini oluşturabildiği, içerikleri puanlayıp yorumlayabildiği ve sosyal akış üzerinden paylaşım yapabildiği web tabanlı bir platformdur.
+Backend: Node.js, Express, Prisma ve SQLite. Frontend: React, Vite ve Tailwind CSS. Giriş için JWT, şifreler için bcrypt kullanılıyor.
 
----
+## Yerelde çalıştırma
 
-## Teknoloji Stack
-
-| Katman | Teknoloji |
-|--------|-----------|
-| Frontend | React 19, React Router v7, Tailwind CSS v4, Vite |
-| Backend | Node.js, Express v5 |
-| Veritabanı | SQLite (Prisma ORM) |
-| Kimlik Doğrulama | JWT (jsonwebtoken), bcryptjs |
-| Harici API | TMDb (filmler), Google Books API (kitaplar) |
-| E-posta | Nodemailer + Brevo SMTP |
-
----
-
-## Özellikler
-
-### Kullanıcı Yönetimi
-- Kayıt ol (şifre tekrarı doğrulaması dahil)
-- Giriş yap / Çıkış yap
-- Profil düzenleme (avatar URL, biyografi)
-- Şifre sıfırlama (e-posta ile)
-
-### Sosyal Akış (Feed)
-- Takip edilen kullanıcıların aktivitelerini görüntüleme
-- Aktivite kartları: poster, puan (★★★★☆), yorum özeti
-- Göreceli zaman ("3 saat önce", "2 gün önce")
-- Sayfalandırma — "Daha Fazla Yükle" butonu
-- Aktivitelere beğeni ve yorum yapabilme
-
-### Arama & Keşfet
-- Film ve kitap arama (TMDb + Google Books)
-- Tür, yıl, minimum puan filtreleme
-- **En Popülerler** ve **En Yüksek Puanlılar** vitrin modülleri
-- Sonuçlara hızlı kütüphane ekleme
-
-### İçerik Detay
-- Film/kitap meta verileri (poster, özet, yıl, tür)
-- Platform ortalaması ve toplam oy sayısı
-- 1–10 arası puanlama (hover önizlemeli)
-- Yorum yap, düzenle, sil
-- Özel listeye ekle menüsü
-- İzledim / İzlenecek / Okudum / Okunacak butonları
-
-### Kütüphane & Profil
-- Sekmeli kütüphane: İzlediklerim, İzlenecekler, Okuduklarım, Okunacaklar
-- Özel koleksiyon listeleri oluşturma
-- Takip et / Takipten çık
-- Gerçek takipçi/takip sayısı
-- **Son Aktiviteler** bölümü
-
----
-
-## Kurulum
-
-### Gereksinimler
-- Node.js 18+
-- TMDb API Key → [themoviedb.org](https://www.themoviedb.org/settings/api)
-- Google Books API Key → [console.cloud.google.com](https://console.cloud.google.com/)
-
-### Backend
+Node.js 22 kullanıyorum. İki ayrı terminal gerekiyor.
 
 ```bash
 cd backend
-npm install
-
-# .env dosyası oluştur
+npm ci
 cp .env.example .env
-# .env içini doldur (aşağıya bak)
-
-# Veritabanını oluştur
-npx prisma migrate dev --name init
-
-# Sunucuyu başlat
-node index.js
 ```
 
-**backend/.env**
-```
-DATABASE_URL="file:./prisma/dev.db"
-JWT_SECRET="gizli_jwt_anahtari"
-TMDB_API_KEY="tmdb_api_anahtarin"
-GOOGLE_BOOKS_API_KEY="google_books_api_anahtarin"
-EMAIL_USER="smtp_kullanici"
-EMAIL_PASS="smtp_sifre"
+Windows PowerShell'de kopyalama adımı `Copy-Item .env.example .env`. `.env` içindeki JWT anahtarını kendi rastgele değerinle doldur. Film ve kitap araması için ilgili API ayarlarını; şifre sıfırlama için SMTP ayarlarını ekle. SQLite dosya yolu Prisma şemasının bulunduğu klasöre göre çözülür.
+
+```bash
+npx prisma generate
+node -e "require('node:fs').closeSync(require('node:fs').openSync('prisma/dev.db', 'a'))"
+npx prisma db push
+npm start
 ```
 
-### Frontend
+Bu repo migration geçmişi içermediğinden yerel deneme veritabanını `db push` ile oluşturuyorum. Üretim ortamında şema değişikliklerinin migration ile yönetilmesi gerekir.
+
+İkinci terminal:
 
 ```bash
 cd frontend
-npm install
+npm ci
 npm run dev
 ```
 
-Uygulama açılır: **http://localhost:5173**
-Backend adresi: **http://localhost:3000**
+Arayüz `http://localhost:5173`, API `http://localhost:3000` adresinde açılır.
 
----
+## Kodda nereden başlamalı?
 
-## Proje Yapısı
+- [Veri modeli](backend/prisma/schema.prisma): kullanıcı, içerik listeleri ve sosyal ilişkiler.
+- [API başlangıcı](backend/index.js) ve [route'lar](backend/routes): isteklerin işlendiği backend.
+- [Arayüz](frontend/src): sayfalar, ortak bileşenler ve giriş durumu.
 
-```
-CineBook/
-├── backend/
-│   ├── index.js              # Express sunucu
-│   ├── middleware/
-│   │   └── auth.js           # JWT doğrulama
-│   ├── routes/
-│   │   ├── auth.js           # Kayıt, giriş, şifre sıfırlama
-│   │   ├── feed.js           # Sosyal akış
-│   │   ├── content.js        # İçerik detay, puanlama, yorum
-│   │   ├── library.js        # Kütüphane yönetimi
-│   │   ├── search.js         # Arama ve keşfet
-│   │   ├── social.js         # Beğeni ve yorum
-│   │   └── users.js          # Profil ve takip
-│   ├── services/
-│   │   ├── tmdb.js           # TMDb API servisi
-│   │   └── books.js          # Google Books servisi
-│   └── prisma/
-│       └── schema.prisma     # Veritabanı şeması
-│
-└── frontend/
-    └── src/
-        ├── context/
-        │   └── AuthContext.jsx   # Global auth state
-        ├── components/
-        │   ├── ActivityCard.jsx  # Aktivite kartı
-        │   ├── Layout.jsx
-        │   └── Navbar.jsx
-        └── pages/
-            ├── Dashboard.jsx     # Ana sayfa (feed)
-            ├── Discover.jsx      # Arama & keşfet
-            ├── ContentDetail.jsx # Film/kitap detay
-            ├── Profile.jsx       # Kullanıcı profili
-            ├── Login.jsx
-            ├── Register.jsx
-            ├── ForgotPassword.jsx
-            └── ResetPassword.jsx
-```
+## Projenin durumu
 
----
+Bu bir ders projesi ve yerel demo. Bazı yazma endpoint'lerinde kullanıcı kimliği istek gövdesinden alınıyor; bütün işlemler için yetki/sahiplik kontrolü tamamlanmış değil. Arayüzde API adresi de yerel ortama sabitlenmiş durumda. Canlı ürün olarak kullanmadan önce bu alanların ve şifre sıfırlama akışının ayrıca ele alınması gerekir.
 
-## Veritabanı Şeması
-
-```
-User ──< Follow (many-to-many, self-referential)
-User ──< List ──< ListItem
-User ──< Review
-User ──< Activity ──< ActivityLike
-                   └──< ActivityComment
-```
-
----
-
-## API Endpoint'leri
-
-| Method | Endpoint | Açıklama |
-|--------|----------|----------|
-| POST | `/auth/register` | Kayıt ol |
-| POST | `/auth/login` | Giriş yap |
-| POST | `/auth/forgot-password` | Şifre sıfırlama isteği |
-| POST | `/auth/reset-password` | Şifre sıfırla |
-| PUT | `/auth/update` | Profil güncelle |
-| GET | `/feed` | Sosyal akış (JWT) |
-| GET | `/search/multi` | Film + kitap ara |
-| GET | `/search/popular` | En popülerler |
-| GET | `/search/top-rated` | En yüksek puanlılar |
-| GET | `/content/:type/:id` | İçerik detayı |
-| POST | `/content/:type/:id/rate` | Puan ver |
-| POST | `/content/:type/:id/review` | Yorum yap |
-| PUT | `/content/:type/:id/review` | Yorum düzenle |
-| DELETE | `/content/:type/:id/review` | Yorum sil |
-| GET | `/library/:userId` | Kütüphaneyi getir |
-| POST | `/library/add` | Listeye ekle |
-| DELETE | `/library/remove` | Listeden çıkar |
-| POST | `/library/create` | Özel liste oluştur |
-| GET | `/users/search` | Kullanıcı ara |
-| GET | `/users/:id` | Profil getir |
-| GET | `/users/:id/activities` | Son aktiviteler |
-| POST | `/users/:id/follow` | Takip et |
-| DELETE | `/users/:id/follow` | Takipten çık |
-| POST | `/social/activity/:id/like` | Beğen |
-| DELETE | `/social/activity/:id/like` | Beğeniyi geri al |
-| POST | `/social/activity/:id/comment` | Yorum yap |
-
----
-
-## Geliştirici
-
-**Yunus Emre Arı** — Kocaeli Üniversitesi Bilgisayar Mühendisliği
+Frontend derlemesi `npm run build`, backend kontrolleri `npm test` ile çalıştırılır. Dört backend kontrolü eksik/kısa JWT anahtarının reddini, doğru anahtarın kullanımını, geçersiz token reddini ve dışarı e-posta göndermeden mesaj oluşturmayı sınar. Sunucu JWT anahtarı yapılandırılmadan başlamaz; şifre sıfırlama tokenı kriptografik rastgelelik kullanır. API anahtarları, yerel veritabanı ve `.env` dosyaları repoya dahil edilmez.

@@ -1,3 +1,5 @@
+const { randomBytes } = require('node:crypto');
+const { readJwtSecret } = require('../config/auth');
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
@@ -41,7 +43,7 @@ router.post('/register', async (req, res) => {
         // Generate JWT
         const token = jwt.sign(
             { userId: user.id, email: user.email },
-            process.env.JWT_SECRET || 'fallback_secret_key_change_this',
+            readJwtSecret(),
             { expiresIn: '24h' }
         );
 
@@ -77,7 +79,7 @@ router.post('/login', async (req, res) => {
         // Generate JWT
         const token = jwt.sign(
             { userId: user.id, email: user.email },
-            process.env.JWT_SECRET || 'fallback_secret_key_change_this',
+            readJwtSecret(),
             { expiresIn: '24h' }
         );
 
@@ -124,7 +126,7 @@ router.post('/forgot-password', async (req, res) => {
         }
 
         // Generate Token
-        const resetToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        const resetToken = randomBytes(32).toString('hex');
         const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour
 
         await prisma.user.update({

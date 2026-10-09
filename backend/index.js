@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { PrismaClient } = require('@prisma/client');
 require('dotenv').config();
+require('./config/auth').readJwtSecret();
 
 const app = express();
 const prisma = new PrismaClient();
